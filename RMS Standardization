@@ -1,0 +1,47 @@
+% The code below takes audio wav files and normalizes them
+% to have an equal average loudness across time.
+% This script was used to normalize audio files for the manuscript
+% titled: "Towards a Better Understanding of In-Vehicle Auditory Warnings and Background Noise."
+% authors: Edin Šabić1, Jing Chen2, and Justin A. MacDonald1
+% New Mexico State University (1), Old Dominion University (2)
+
+m = zeros(29,1);
+
+for wave_number = 1:29 % assumes that your files are named 1.wav, 2.wav, etc.
+    
+    % read in the sound file
+    sound_in = audioread([int2str(1) '.wav']);
+    sound_in = sound_in(:,1);
+    
+    % calculate the rms of the original wav file
+    rms = sqrt(mean(sound_in.^2));
+    
+    %rescale the sound so that the rms is 1
+    sound_in = sound_in ./ rms;
+    
+    % get the max sample value for the rescaled sound
+    m(wave_number) = max(abs(sound_in));
+    
+    % repeat this process for all of your other sound files
+end
+
+%this gives you the max sample across all of your stimuli
+max_sample = max(m);
+
+%rescale all 29 stimuli so that none of them have samples that exceed +/- 1
+for wave_number = 1:29
+
+    % read in the sound file
+    [sound_in,Fs] = audioread([int2str(wave_number) '.wav']);
+    
+    % calculate the rms of the original wav file
+    rms = sqrt(mean(sound_in.^2));
+    
+    %rescale the sound so that the rms is 1
+    sound_in = sound_in ./ rms;
+    
+    % rescale the sound 1 more time
+    sound_in = sound_in ./ max_sample;
+    audiowrite([int2str(wave_number) '_out.wav'],sound_in,Fs);
+    
+end
